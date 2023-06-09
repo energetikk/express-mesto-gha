@@ -3,10 +3,10 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-multiple-empty-lines */
 const User = require('../models/user');
-// const users = [];
-// let id = 0;
+
+const { notFoundError, validationError, defaultError } = require('../errors/errors');
+
 const getUsers = (req, res) => {
-  // console.log('это GET запрос на /юзерс');
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => res.status(500).send({ "message": 'Internal Server Error', err: err.message, stack: err.stack }));
@@ -14,15 +14,9 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(() => new Error('not found'))
+    .orFail(() => new Error('Not found'))
     .then((user) => res.status(200).send(user))
-    .catch((err) => res.status(500).send({ "message": 'Internal Server Error', err: err.message, stack: err.stack }));
-  // const user = users.find((item) => item.id === Number(userId));
-
-  // if (user) {
-  //   return res.status(200).send(user);
-  // }
-  // return res.status(404).send({ 'message': 'User not found' });
+    .catch((err) => res.status(500).send({ "message": "Internal Server Error", err: err.message, stack: err.stack }));
 };
 
 const createUser = (req, res) => {
@@ -36,4 +30,6 @@ module.exports = {
   createUser,
   getUserById,
   getUsers,
+  updateProfileUser,
+  updateAvatarUser,
 };
