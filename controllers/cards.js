@@ -9,25 +9,84 @@ const { notFoundError, validationError, defaultError } = require('../errors/erro
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
-    .catch((err) => res.status(500).send({ "message": 'Internal Server Error', err: err.message, stack: err.stack }));
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(validationError).send({ message: 'Переданные данные некорректны', err: err.message });
+      }
+      if (err.message === 'Not Found') {
+        return res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
+      }
+      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
+    });
 };
 
-const getUserById = (req, res) => {
-  Card.findById(req.params.userId)
-    .orFail(() => new Error('Not found'))
+const deleteCardById = (req, res) => {
+  Card.findByIdAndRemove(req.params.cardId)
+    .orFail(() => new Error('Not found user'))
     .then((card) => res.status(200).send(card))
-    .catch((err) => res.status(500).send({ "message": "Internal Server Error", err: err.message, stack: err.stack }));
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      }
+      if (err.message === 'Not Found') {
+        return res.status(notFoundError).send({ message: 'Объект не найден' });
+      }
+      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+    });
 };
 
 const createCard = (req, res) => {
-  const { name, about, avatar } = req.body;
-  Card.create({ name, about, avatar })
+  const owner = req.user._id;
+  const { name, link } = req.body;
+  Card.create({ owner, name, link })
     .then((card) => res.status(201).send(card))
-    .catch((err) => res.status(500).send('Internal error'));
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      }
+      if (err.message === 'Not Found') {
+        return res.status(notFoundError).send({ message: 'Объект не найден' });
+      }
+      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+    });
+};
+
+const setLikeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
+    .orFail(() => new Error('Not Found'))
+    .then((card) => res.status(201).send(card))
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      }
+      if (err.message === 'Not Found') {
+        return res.status(notFoundError).send({ message: 'Объект не найден' });
+      }
+      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+    });
+};
+
+const setUnLikeCard = (req, res) => {
+  const owner = req.user._id;
+  Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
+    .orFail(() => new Error('Not Found'))
+    .then((card) => res.status(201).send(card))
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      }
+      if (err.message === 'Not Found') {
+        return res.status(notFoundError).send({ message: 'Объект не найден' });
+      }
+      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+    });
 };
 
 module.exports = {
-  createCard,
-  getUserById,
   getCards,
+  createCard,
+  deleteCardById,
+  setLikeCard,
+  setUnLikeCard,
 };
