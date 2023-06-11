@@ -71,7 +71,7 @@ const setUnLikeCard = (req, res) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
     .orFail(() => new Error('Not Found'))
-    .then((card) => res.status(200).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
