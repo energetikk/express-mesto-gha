@@ -54,7 +54,7 @@ const createUser = (req, res) => {
 const updateProfileUser = (req, res) => {
   const { name, about } = req.body;
   const owner = req.user._id;
-  User.findByIdAndUpdate({ name, about }, owner, { new: true, runValidators: true })
+  User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
@@ -70,7 +70,7 @@ const updateProfileUser = (req, res) => {
 const updateAvatarUser = (req, res) => {
   const { avatar } = req.body;
   const owner = req.user._id;
-  User.findByIdAndUpdate({ avatar }, owner, { new: true, runValidators: true })
+  User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
