@@ -1,7 +1,12 @@
-/* eslint-disable object-curly-newline */
 const router = require('express').Router();
 
-const { createUser, getUserById, getUsers, updateProfileUser, updateAvatarUser } = require('../controllers/users');
+const {
+  createUser,
+  getUserById,
+  getUsers,
+  updateProfileUser,
+  updateAvatarUser,
+} = require('../controllers/users');
 
 router.get('/', getUsers);
 router.get('/:userId', getUserById);

@@ -1,7 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
-/* eslint-disable linebreak-style */
-/* eslint-disable no-multiple-empty-lines */
 const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
