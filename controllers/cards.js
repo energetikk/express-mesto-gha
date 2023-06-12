@@ -34,9 +34,6 @@ const createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
       }
-      // if (err.message === 'Not Found') {
-      //   return res.status(notFoundError).send({ message: 'Объект не найден' });
-      // }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };

@@ -4,16 +4,9 @@ const { notFoundError, validationError, defaultError } = require('../errors/erro
 
 const getUsers = (req, res) => {
   User.find({})
-    .populate(['name', 'about', 'avatar'])
     .then((users) => res.status(200).send(users))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны', err: err.message });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
+      res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
     });
 };
 
@@ -22,8 +15,8 @@ const getUserById = (req, res) => {
     .orFail(() => new Error('Not Found'))
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны', err: err.message });
+      if (err.name === 'CastError') {
+        return res.status(validationError).send({ message: 'Передан невалидный ID', err: err.message });
       }
       if (err.message === 'Not Found') {
         return res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
@@ -37,11 +30,8 @@ const createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
       }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
@@ -53,11 +43,8 @@ const updateProfileUser = (req, res) => {
   User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
       }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
@@ -71,9 +58,6 @@ const updateAvatarUser = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError' || err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
       }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
