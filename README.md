@@ -17,4 +17,4 @@
 
 ## Ссылка на проект 
 
-* [Ссылка на GitHub Pages:](https://energetikk.github.io/express-mesto-gha/) 
+* [Ссылка на GitHub Pages](https://energetikk.github.io/express-mesto-gha/) 

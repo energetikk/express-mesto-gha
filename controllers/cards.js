@@ -6,13 +6,7 @@ const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны', err: err.message });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
+      res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
     });
 };
 
@@ -21,8 +15,8 @@ const deleteCardById = (req, res) => {
     .orFail(() => new Error('Not found'))
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      if (err.name === 'CastError') {
+        return res.status(validationError).send({ message: 'Передан невалидный ID' });
       }
       if (err.message === 'Not found') {
         return res.status(notFoundError).send({ message: 'Объект не найден' });
@@ -37,12 +31,12 @@ const createCard = (req, res) => {
   Card.create({ owner, name, link })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
       }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
-      }
+      // if (err.message === 'Not Found') {
+      //   return res.status(notFoundError).send({ message: 'Объект не найден' });
+      // }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
@@ -53,8 +47,8 @@ const setLikeCard = (req, res) => {
     .orFail(() => new Error('Not Found'))
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      if (err.name === 'CastError') {
+        return res.status(validationError).send({ message: 'Передан невалидный ID' });
       }
       if (err.message === 'Not Found') {
         return res.status(notFoundError).send({ message: 'Объект не найден' });
@@ -69,8 +63,8 @@ const setUnLikeCard = (req, res) => {
     .orFail(() => new Error('Not Found'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+      if (err.name === 'CastError') {
+        return res.status(validationError).send({ message: 'Передан невалидный ID' });
       }
       if (err.message === 'Not Found') {
         return res.status(notFoundError).send({ message: 'Объект не найден' });
