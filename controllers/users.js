@@ -2,11 +2,13 @@ const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 
+const statusOK = 201;
+
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
-      res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
+      res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
     });
 };
 
@@ -28,7 +30,7 @@ const getUserById = (req, res) => {
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
+    .then((user) => res.status(statusOK).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
@@ -56,7 +58,7 @@ const updateAvatarUser = (req, res) => {
   User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'CastError' || err.name === 'ValidationError') {
+      if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
       }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });

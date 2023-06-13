@@ -2,11 +2,13 @@ const Card = require('../models/card');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 
+const statusOK = 201;
+
 const getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.status(200).send(cards))
     .catch((err) => {
-      res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
+      res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
     });
 };
 
@@ -29,7 +31,7 @@ const createCard = (req, res) => {
   const owner = req.user._id;
   const { name, link } = req.body;
   Card.create({ owner, name, link })
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(statusOK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(validationError).send({ message: 'Переданные данные некорректны' });
@@ -42,7 +44,7 @@ const setLikeCard = (req, res) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
     .orFail(() => new Error('Not Found'))
-    .then((card) => res.status(201).send(card))
+    .then((card) => res.status(statusOK).send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         return res.status(validationError).send({ message: 'Передан невалидный ID' });
