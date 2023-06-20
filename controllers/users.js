@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
@@ -5,6 +6,7 @@ const { notFoundError, validationError, defaultError } = require('../errors/erro
 const statusOK = 201;
 
 const getUsers = (req, res) => {
+  // console.log('kkykykykykkykyky');
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
@@ -28,14 +30,18 @@ const getUserById = (req, res) => {
 };
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => res.status(statusOK).send(user))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+  // console.log('kkykykykykkykyky');
+  // console.log(req.body);
+  bcrypt.hash(String(req.body.password), 10)
+    .then((hashedpassword) => {
+      User.create({ ...req.body, password: hashedpassword })
+        .then((user) => res.status(statusOK).send(user))
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+          }
+          return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+        });
     });
 };
 
