@@ -5,6 +5,26 @@ const { notFoundError, validationError, defaultError } = require('../errors/erro
 
 const statusOK = 201;
 
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ email })
+    .select('+password')
+    .orFail(() => new Error('Неправильный логин или пароль'))
+    .then((user) => {
+      console.log(user);
+      bcrypt.compare(String(password), user.password)
+        .then((isValidUser) => {
+          console.log(isValidUser);
+          if (isValidUser) {
+            res.status(200).send({ data: user });
+          } else {
+            res.status(403).send({ message: 'Неправильный логин или пароль' });
+          }
+        });
+    })
+    .catch(next);
+};
+
 const getUsers = (req, res) => {
   // console.log('kkykykykykkykyky');
   User.find({})
@@ -31,7 +51,7 @@ const getUserById = (req, res) => {
 
 const createUser = (req, res) => {
   // console.log('kkykykykykkykyky');
-  // console.log(req.body);
+  console.log(req.body);
   bcrypt.hash(String(req.body.password), 10)
     .then((hashedpassword) => {
       User.create({ ...req.body, password: hashedpassword })
@@ -72,6 +92,7 @@ const updateAvatarUser = (req, res) => {
 };
 
 module.exports = {
+  login,
   createUser,
   getUserById,
   getUsers,

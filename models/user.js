@@ -6,24 +6,24 @@ const validator = require('validator');
 const userSchema = new mongoose.Schema({
   name: {
     default: 'Жак-Ив-Кусто',
-    required: [true, 'Поле name должно быть обязательно заполнено'],
-    // required: true,
+    // required: [true, 'Поле name должно быть обязательно заполнено'],
+    required: true,
     type: String,
     minlength: 2,
     maxlength: 30,
   },
   about: {
     default: 'Исследователь',
-    required: [true, 'Поле about должно быть обязательно заполнено'],
-    // required: true,
+    // required: [true, 'Поле about должно быть обязательно заполнено'],
+    required: true,
     type: String,
     minlength: 2,
     maxlength: 30,
   },
   avatar: {
-    default: 'https://img.icons8.com/?size=512&id=39590&format=png',
-    required: [true, 'Поле avatar должно быть обязательно заполнено'],
-    // required: true,
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    // required: [true, 'Поле avatar должно быть обязательно заполнено'],
+    required: true,
     type: String,
   },
   email: {
@@ -39,6 +39,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'Поле password должно быть обязательно заполнено'],
     // required: true,
     type: String,
+    select: false,
   },
 });
 
