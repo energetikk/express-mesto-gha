@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
@@ -11,12 +12,16 @@ const login = (req, res, next) => {
     .select('+password')
     .orFail(() => new Error('Неправильный логин или пароль'))
     .then((user) => {
-      console.log(user);
       bcrypt.compare(String(password), user.password)
         .then((isValidUser) => {
-          console.log(isValidUser);
           if (isValidUser) {
-            res.status(200).send({ data: user });
+            const jwt = jsonWebToken.sign({ _id: user._id }, 'secret_phrase');
+            res.cookie('jwt', jwt, {
+              maxAge: 36000,
+              httpOnly: true,
+              sameSite: true,
+            });
+            res.status(200).send({ data: user.toJSON() });
           } else {
             res.status(403).send({ message: 'Неправильный логин или пароль' });
           }
