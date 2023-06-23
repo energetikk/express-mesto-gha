@@ -6,6 +6,7 @@ const auth = (req, res, next) => {
 
   try {
     payload = jwt.verify(token, 'secret_phrase');
+    console.log(payload);
   } catch (err) {
     next(err);
   }

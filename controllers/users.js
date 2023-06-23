@@ -3,6 +3,9 @@ const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
+const { NotFoundError } = require('../errors/notFoundError');
+// const { NotFoundError } = require('../errors/notFoundError');
+// const { NotFoundError } = require('../errors/notFoundError');
 
 const statusOK = 201;
 
@@ -17,13 +20,13 @@ const login = (req, res, next) => {
           if (isValidUser) {
             const jwt = jsonWebToken.sign({ _id: user._id }, 'secret_phrase');
             res.cookie('jwt', jwt, {
-              maxAge: 36000,
+              maxAge: 360000,
               httpOnly: true,
               sameSite: true,
             });
             res.status(200).send({ data: user.toJSON() });
           } else {
-            res.status(403).send({ message: 'Неправильный логин или пароль' });
+            res.status(401).send({ message: 'Неправильный логин или пароль' });
           }
         });
     })
@@ -52,6 +55,18 @@ const getUserById = (req, res) => {
       }
       return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
     });
+};
+
+const getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Ползователь с указанным id не найден');
+      } else {
+        next(res.send(user));
+      }
+    })
+    .catch(next);
 };
 
 const createUser = (req, res) => {
@@ -100,6 +115,7 @@ module.exports = {
   login,
   createUser,
   getUserById,
+  getUserInfo,
   getUsers,
   updateProfileUser,
   updateAvatarUser,

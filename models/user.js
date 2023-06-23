@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
-// eslint-disable-next-line import/no-extraneous-dependencies
 const validator = require('validator');
+const { linkRegular } = require('../utils/consts');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     // required: [true, 'Поле avatar должно быть обязательно заполнено'],
     required: true,
     type: String,
+    match: linkRegular,
   },
   email: {
     required: [true, 'Поле email должно быть обязательно заполнено'],
