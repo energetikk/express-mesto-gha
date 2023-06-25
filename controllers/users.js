@@ -46,15 +46,16 @@ const getUserById = (req, res, next) => {
     // .orFail(() => new NotFoundError('Объект не найден'))
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Объект не найден');
+        throw new NotFoundError('Пользователь с таким id не найден');
       } else {
         next(res.send(user));
       }
     })
     .catch((err) => {
+      // if (err.name === 'CastError') {
       if (err.name === 'CastError') {
-        throw new ValidationError('Передан невалидный ID');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Передан невалидный ID'));
+      } else next(new DefaultError('Произошла неизвестная ошибка сервера'));
     });
 };
 
