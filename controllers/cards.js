@@ -41,27 +41,43 @@ const createCard = (req, res) => {
     });
 };
 
-const setLikeCard = (req, res) => {
+const setLikeCard = (req, res, next) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
-    .orFail(() => new NotFoundError('Объект не найден'))
-    .then((card) => res.status(statusOK).send(card))
+    // .orFail(() => new NotFoundError('Объект не найден'))
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Объект не найден');
+      } else {
+        next(res.send({ data: card }));
+      }
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Передан невалидный ID');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Передан невалидный ID'));
+      } else {
+        next(err);
+      }
     });
 };
 
-const setUnLikeCard = (req, res) => {
+const setUnLikeCard = (req, res, next) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
-    .orFail(() => new NotFoundError('Объект не найден'))
-    .then((card) => res.send(card))
+    // .orFail(() => new NotFoundError('Объект не найден'))
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Объект не найден');
+      } else {
+        next(res.send({ data: card }));
+      }
+    })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Передан невалидный ID');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Передан невалидный ID'));
+      } else {
+        next(err);
+      }
     });
 };
 
