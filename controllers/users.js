@@ -2,7 +2,6 @@ const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 
-// const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const NotFoundError = require('../errors/notFoundError');
 const ConflictError = require('../errors/conflictError');
 const UnauthorizedError = require('../errors/unauthorizedError');
@@ -43,7 +42,6 @@ const getUsers = (req, res, next) => {
 
 const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    // .orFail(() => new NotFoundError('Объект не найден'))
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Пользователь с таким id не найден');

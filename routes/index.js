@@ -1,7 +1,6 @@
 const express = require('express');
 
 const router = express.Router();
-// const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const userRoutes = require('./users');
 const cardRoutes = require('./cards');

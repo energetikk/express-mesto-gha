@@ -6,7 +6,6 @@ const { linkRegular } = require('../utils/consts');
 const userSchema = new mongoose.Schema({
   name: {
     default: 'Жак-Ив Кусто',
-    // required: [true, 'Поле name должно быть обязательно заполнено'],
     required: true,
     type: String,
     minlength: 2,
@@ -14,7 +13,6 @@ const userSchema = new mongoose.Schema({
   },
   about: {
     default: 'Исследователь',
-    // required: [true, 'Поле about должно быть обязательно заполнено'],
     required: true,
     type: String,
     minlength: 2,
@@ -22,7 +20,6 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    // required: [true, 'Поле avatar должно быть обязательно заполнено'],
     required: true,
     type: String,
     match: linkRegular,
@@ -38,7 +35,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     required: [true, 'Поле password должно быть обязательно заполнено'],
-    // required: true,
     type: String,
     select: false,
   },

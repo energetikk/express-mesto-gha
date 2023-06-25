@@ -1,6 +1,5 @@
 const Card = require('../models/card');
 
-// const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
 const DefaultError = require('../errors/defaultError');
@@ -44,7 +43,6 @@ const createCard = (req, res) => {
 const setLikeCard = (req, res, next) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
-    // .orFail(() => new NotFoundError('Объект не найден'))
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Объект не найден');
@@ -64,7 +62,6 @@ const setLikeCard = (req, res, next) => {
 const setUnLikeCard = (req, res, next) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
-    // .orFail(() => new NotFoundError('Объект не найден'))
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Объект не найден');
