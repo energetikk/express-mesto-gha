@@ -4,8 +4,6 @@ const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const { NotFoundError } = require('../errors/notFoundError');
-// const { NotFoundError } = require('../errors/notFoundError');
-// const { NotFoundError } = require('../errors/notFoundError');
 
 const statusOK = 201;
 
