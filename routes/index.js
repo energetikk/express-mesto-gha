@@ -1,12 +1,15 @@
-const router = require('express').Router();
+const express = require('express');
+
+const router = express.Router();
+// const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const userRoutes = require('./users');
 const cardRoutes = require('./cards');
 const { createUser, login } = require('../controllers/users');
 const NotFoundError = require('../errors/notFoundError');
+const auth = require('../middlewares/auth');
 
 const { linkRegular } = require('../utils/consts');
-const auth = require('../middlewares/auth');
 
 router.post('/signin', celebrate(
   {
@@ -30,14 +33,13 @@ router.post('/signup', celebrate(
 ), createUser);
 
 router.use(auth);
-
-router.use('/users', userRoutes);
-router.use('/cards', cardRoutes);
 router.get('/signout', (req, res) => {
   res.clearCookie('jwt').send({ message: 'Выход' });
 });
+router.use('/users', userRoutes);
+router.use('/cards', cardRoutes);
 
-router.use('*', (req, res, next) => {
+router.use('/*', (req, res, next) => {
   next(new NotFoundError('Указанный путь не существует'));
 });
 

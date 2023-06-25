@@ -5,7 +5,7 @@ const { linkRegular } = require('../utils/consts');
 
 const userSchema = new mongoose.Schema({
   name: {
-    default: 'Жак-Ив-Кусто',
+    default: 'Жак-Ив Кусто',
     // required: [true, 'Поле name должно быть обязательно заполнено'],
     required: true,
     type: String,
