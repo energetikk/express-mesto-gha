@@ -6,6 +6,8 @@ const { notFoundError, validationError, defaultError } = require('../errors/erro
 const { NotFoundError } = require('../errors/notFoundError');
 const ConflictError = require('../errors/conflictError');
 const UnauthorizedError = require('../errors/unauthorizedError');
+const ValidationError = require('../errors/validationError');
+const DefaultError = require('../errors/defaultError');
 
 const statusOK = 201;
 
@@ -20,7 +22,7 @@ const login = (req, res, next) => {
           if (isValidUser) {
             const jwt = jsonWebToken.sign({ _id: user._id }, 'secret_phrase');
             res.cookie('jwt', jwt, {
-              maxAge: 360000,
+              maxAge: 604800000,
               httpOnly: true,
               sameSite: true,
             });
@@ -34,7 +36,6 @@ const login = (req, res, next) => {
 };
 
 const getUsers = (req, res) => {
-  // console.log('kkykykykykkykyky');
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
@@ -87,12 +88,13 @@ const updateProfileUser = (req, res) => {
   const { name, about } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.send(user))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+        // return res.status(validationError).send({ message: 'Переданные данные некорректны' });
+        throw new ValidationError('Переданные данные некорректны');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+      // return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
