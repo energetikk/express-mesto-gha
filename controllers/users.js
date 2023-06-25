@@ -5,6 +5,7 @@ const User = require('../models/user');
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const { NotFoundError } = require('../errors/notFoundError');
 const ConflictError = require('../errors/conflictError');
+const UnauthorizedError = require('../errors/unauthorizedError');
 
 const statusOK = 201;
 
@@ -12,7 +13,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
     .select('+password')
-    .orFail(() => new Error('Неправильный логин или пароль'))
+    .orFail(() => new UnauthorizedError('Неправильный логин или пароль'))
     .then((user) => {
       bcrypt.compare(String(password), user.password)
         .then((isValidUser) => {
