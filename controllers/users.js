@@ -2,8 +2,8 @@ const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { notFoundError, validationError, defaultError } = require('../errors/errors');
-const { NotFoundError } = require('../errors/notFoundError');
+// const { notFoundError, validationError, defaultError } = require('../errors/errors');
+const NotFoundError = require('../errors/notFoundError');
 const ConflictError = require('../errors/conflictError');
 const UnauthorizedError = require('../errors/unauthorizedError');
 const ValidationError = require('../errors/validationError');
@@ -35,26 +35,20 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
-const getUsers = (req, res) => {
+const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
-    .catch((err) => {
-      res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
-    });
+    .then((users) => res.send(users))
+    .catch(next);
 };
 
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(() => new Error('Not Found'))
-    .then((user) => res.status(200).send(user))
+    .orFail(() => new NotFoundError('Объект не найден'))
+    .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(validationError).send({ message: 'Передан невалидный ID', err: err.message });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден', err: err.message });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
+        throw new ValidationError('Передан невалидный ID');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
     });
 };
 
@@ -91,10 +85,8 @@ const updateProfileUser = (req, res) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        // return res.status(validationError).send({ message: 'Переданные данные некорректны' });
         throw new ValidationError('Переданные данные некорректны');
       } else throw new DefaultError('Произошла неизвестная ошибка сервера');
-      // return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
     });
 };
 
@@ -105,9 +97,8 @@ const updateAvatarUser = (req, res) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+        throw new ValidationError('Переданные данные некорректны');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
     });
 };
 
