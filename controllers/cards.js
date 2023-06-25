@@ -1,7 +1,7 @@
 const Card = require('../models/card');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
-const ConflictError = require('../errors/conflictError');
+const ForbiddenError = require('../errors/forbiddenError');
 
 const statusOK = 201;
 
@@ -16,26 +16,16 @@ const getCards = (req, res) => {
 const deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail(() => new Error('Not found'))
-    // .then((card) => res.status(200).send(card))
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
         Card.deleteOne(card)
           .then(() => res.send({ data: card }))
           .catch(next);
       } else {
-        throw new ConflictError('Недостаточно прав для удаления');
+        throw new ForbiddenError('Недостаточно прав для удаления');
       }
     })
     .catch(next);
-  // .catch((err) => {
-  //   if (err.name === 'CastError') {
-  //     return res.status(validationError).send({ message: 'Передан невалидный ID' });
-  //   }
-  //   if (err.message === 'Not found') {
-  //     return res.status(notFoundError).send({ message: 'Объект не найден' });
-  //   }
-  //   return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
-  // });
 };
 
 const createCard = (req, res) => {
