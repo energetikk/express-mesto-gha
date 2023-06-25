@@ -4,7 +4,7 @@ const User = require('../models/user');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const { NotFoundError } = require('../errors/notFoundError');
-
+const ConflictError = require('../errors/conflictError');
 const statusOK = 201;
 
 const login = (req, res, next) => {
@@ -67,19 +67,17 @@ const getUserInfo = (req, res, next) => {
     .catch(next);
 };
 
-const createUser = (req, res) => {
-  // console.log('kkykykykykkykyky');
+const createUser = (req, res, next) => {
   console.log(req.body);
   bcrypt.hash(String(req.body.password), 10)
-    .then((hashedpassword) => {
-      User.create({ ...req.body, password: hashedpassword })
-        .then((user) => res.status(statusOK).send(user))
-        .catch((err) => {
-          if (err.name === 'ValidationError') {
-            return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-          }
-          return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
-        });
+    .then((hashedpassword) => User.create({ ...req.body, password: hashedpassword })
+      .then((user) => res.status(statusOK).send({ data: user.toJSON() })
+        .catch(next)))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('Пользователь с таким E-mail уже существует'));
+      }
+      next(err);
     });
 };
 

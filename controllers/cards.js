@@ -2,6 +2,7 @@ const Card = require('../models/card');
 
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const ForbiddenError = require('../errors/forbiddenError');
+const NotFoundError = require('../errors/notFoundError');
 
 const statusOK = 201;
 
@@ -15,7 +16,7 @@ const getCards = (req, res) => {
 
 const deleteCardById = (req, res, next) => {
   Card.findById(req.params.cardId)
-    .orFail(() => new Error('Not found'))
+    .orFail(() => new NotFoundError('Карточка с указанным id не найдена'))
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
         Card.deleteOne(card)
