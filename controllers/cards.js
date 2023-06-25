@@ -1,17 +1,17 @@
 const Card = require('../models/card');
 
-const { notFoundError, validationError, defaultError } = require('../errors/errors');
-const ForbiddenError = require('../errors/forbiddenError');
+// const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const NotFoundError = require('../errors/notFoundError');
+const ForbiddenError = require('../errors/forbiddenError');
+const DefaultError = require('../errors/defaultError');
+const ValidationError = require('../errors/validationError');
 
 const statusOK = 201;
 
-const getCards = (req, res) => {
+const getCards = (req, res, next) => {
   Card.find({})
-    .then((cards) => res.status(200).send(cards))
-    .catch((err) => {
-      res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера', err: err.message });
-    });
+    .then((cards) => res.send(cards))
+    .catch(next);
 };
 
 const deleteCardById = (req, res, next) => {
@@ -36,41 +36,32 @@ const createCard = (req, res) => {
     .then((card) => res.status(statusOK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(validationError).send({ message: 'Переданные данные некорректны' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+        throw new ValidationError('Переданные данные некорректны');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
     });
 };
 
 const setLikeCard = (req, res) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $addToSet: { likes: owner } }, { new: true })
-    .orFail(() => new Error('Not Found'))
+    .orFail(() => new NotFoundError('Объект не найден'))
     .then((card) => res.status(statusOK).send(card))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(validationError).send({ message: 'Передан невалидный ID' });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+      if (err.name === 'ValidationError') {
+        throw new ValidationError('Передан невалидный ID');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
     });
 };
 
 const setUnLikeCard = (req, res) => {
   const owner = req.user._id;
   Card.findByIdAndUpdate(req.params.cardId, { $pull: { likes: owner } }, { new: true })
-    .orFail(() => new Error('Not Found'))
+    .orFail(() => new NotFoundError('Объект не найден'))
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res.status(validationError).send({ message: 'Передан невалидный ID' });
-      }
-      if (err.message === 'Not Found') {
-        return res.status(notFoundError).send({ message: 'Объект не найден' });
-      }
-      return res.status(defaultError).send({ message: 'Произошла неизвестная ошибка сервера' });
+      if (err.name === 'ValidationError') {
+        throw new ValidationError('Передан невалидный ID');
+      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
     });
 };
 

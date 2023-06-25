@@ -26,7 +26,7 @@ const login = (req, res, next) => {
               httpOnly: true,
               sameSite: true,
             });
-            res.status(200).send({ data: user.toJSON() });
+            res.send({ data: user.toJSON() });
           } else {
             res.status(401).send({ message: 'Неправильный логин или пароль' });
           }
