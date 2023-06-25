@@ -52,10 +52,11 @@ const getUserById = (req, res, next) => {
       }
     })
     .catch((err) => {
-      // if (err.name === 'CastError') {
       if (err.name === 'CastError') {
         next(new ValidationError('Передан невалидный ID'));
-      } else next(new DefaultError('Произошла неизвестная ошибка сервера'));
+      } else {
+        next(err);
+      }
     });
 };
 
