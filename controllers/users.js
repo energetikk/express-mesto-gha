@@ -41,10 +41,16 @@ const getUsers = (req, res, next) => {
     .catch(next);
 };
 
-const getUserById = (req, res) => {
+const getUserById = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(() => new NotFoundError('Объект не найден'))
-    .then((user) => res.send(user))
+    // .orFail(() => new NotFoundError('Объект не найден'))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Объект не найден');
+      } else {
+        next(res.send(user));
+      }
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         throw new ValidationError('Передан невалидный ID');
