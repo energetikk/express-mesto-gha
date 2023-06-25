@@ -5,6 +5,7 @@ const User = require('../models/user');
 const { notFoundError, validationError, defaultError } = require('../errors/errors');
 const { NotFoundError } = require('../errors/notFoundError');
 const ConflictError = require('../errors/conflictError');
+
 const statusOK = 201;
 
 const login = (req, res, next) => {
