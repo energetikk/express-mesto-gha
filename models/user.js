@@ -6,21 +6,18 @@ const { linkRegular } = require('../utils/consts');
 const userSchema = new mongoose.Schema({
   name: {
     default: 'Жак-Ив Кусто',
-    required: true,
     type: String,
     minlength: 2,
     maxlength: 30,
   },
   about: {
     default: 'Исследователь',
-    required: true,
     type: String,
     minlength: 2,
     maxlength: 30,
   },
   avatar: {
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-    required: true,
     type: String,
     match: linkRegular,
   },

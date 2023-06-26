@@ -2,7 +2,7 @@ const Card = require('../models/card');
 
 const NotFoundError = require('../errors/notFoundError');
 const ForbiddenError = require('../errors/forbiddenError');
-const DefaultError = require('../errors/defaultError');
+// const DefaultError = require('../errors/defaultError');
 const ValidationError = require('../errors/validationError');
 
 const statusOK = 201;
@@ -28,15 +28,17 @@ const deleteCardById = (req, res, next) => {
     .catch(next);
 };
 
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const owner = req.user._id;
   const { name, link } = req.body;
   Card.create({ owner, name, link })
     .then((card) => res.status(statusOK).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Переданные данные некорректны');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Переданные данные некорректны'));
+      } else {
+        next(err);
+      }
     });
 };
 
@@ -51,8 +53,8 @@ const setLikeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Передан невалидный ID'));
+      if (err.name === 'CastError') {
+        next(new ValidationError('Передан невалидный запрос id карточки'));
       } else {
         next(err);
       }
@@ -70,8 +72,8 @@ const setUnLikeCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Передан невалидный ID'));
+      if (err.name === 'CastError') {
+        next(new ValidationError('Передан невалидный запрос id карточки'));
       } else {
         next(err);
       }

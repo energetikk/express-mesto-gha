@@ -12,7 +12,7 @@ const statusOK = 201;
 
 const login = (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email })
+  return User.findOne({ email })
     .select('+password')
     .orFail(() => new UnauthorizedError('Неправильный логин или пароль'))
     .then((user) => {
@@ -25,9 +25,9 @@ const login = (req, res, next) => {
               httpOnly: true,
               sameSite: true,
             });
-            res.send({ data: user.toJSON() });
+            res.send({ data: user });
           } else {
-            res.status(401).send({ message: 'Неправильный логин или пароль' });
+            throw new UnauthorizedError('Неправильный логин или пароль');
           }
         });
     })
@@ -73,38 +73,40 @@ const getUserInfo = (req, res, next) => {
 const createUser = (req, res, next) => {
   console.log(req.body);
   bcrypt.hash(String(req.body.password), 10)
-    .then((hashedpassword) => User.create({ ...req.body, password: hashedpassword })
-      .then((user) => res.status(statusOK).send({ data: user.toJSON() })
-        .catch(next)))
+    .then((hashedpassword) => User.create({ ...req.body, password: hashedpassword }))
+    .then((user) => res.status(statusOK).send({ data: user.toJSON() }))
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err.name === 'CastError') {
+        next(new ValidationError('Переданные данные некорректны'));
+      } else if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким E-mail уже существует'));
+      } else {
+        next(err);
       }
-      next(err);
     });
 };
 
-const updateProfileUser = (req, res) => {
+const updateProfileUser = (req, res, next) => {
   const { name, about } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(owner, { name, about }, { new: true, runValidators: true })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Переданные данные некорректны');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Переданные данные некорректны'));
+      } else next(new DefaultError('Произошла неизвестная ошибка сервера'));
     });
 };
 
-const updateAvatarUser = (req, res) => {
+const updateAvatarUser = (req, res, next) => {
   const { avatar } = req.body;
   const owner = req.user._id;
   User.findByIdAndUpdate(owner, { avatar }, { new: true, runValidators: true })
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new ValidationError('Переданные данные некорректны');
-      } else throw new DefaultError('Произошла неизвестная ошибка сервера');
+        next(new ValidationError('Переданные данные некорректны'));
+      } else next(new DefaultError('Произошла неизвестная ошибка сервера'));
     });
 };
 
