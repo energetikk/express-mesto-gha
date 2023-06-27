@@ -29,7 +29,8 @@ const login = (req, res, next) => {
           } else {
             throw new UnauthorizedError('Неправильный логин или пароль');
           }
-        });
+        })
+        .catch(next);
     })
     .catch(next);
 };
@@ -76,7 +77,7 @@ const createUser = (req, res, next) => {
     .then((hashedpassword) => User.create({ ...req.body, password: hashedpassword }))
     .then((user) => res.status(statusOK).send({ data: user.toJSON() }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         next(new ValidationError('Переданные данные некорректны'));
       } else if (err.code === 11000) {
         next(new ConflictError('Пользователь с таким E-mail уже существует'));
